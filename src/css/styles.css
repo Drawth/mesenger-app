@@ -1,0 +1,49 @@
+/* Genel stil ayarları */
+body {
+    background-color: #f5f5f5; /* Arka plan rengi */
+    font-family: 'Roboto', sans-serif; /* Yazı tipi */
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Ana konteyner stil ayarları */
+  .container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Sayfanın yüksekliğini kaplama */
+  }
+  
+  /* Kağıt bileşeni için stil ayarları */
+  .paper {
+    padding: 20px;
+    border-radius: 8px; /* Köşe yuvarlama */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Gölge efekti */
+  }
+  
+  /* Başlık stil ayarları */
+  h4 {
+    margin-bottom: 20px; /* Başlık altındaki boşluk */
+  }
+  
+  /* Buton stil ayarları */
+  .button {
+    margin-top: 10px; /* Butonların üstündeki boşluk */
+  }
+  
+  /* Mesaj listesi stil ayarları */
+  .message {
+    padding: 10px;
+    border-radius: 5px;
+    margin: 5px 0;
+  }
+  
+  .message-sent {
+    background-color: #d1e7dd; /* Gönderilen mesaj rengi */
+    align-self: flex-end; /* Mesajın sağa yaslanması */
+  }
+  
+  .message-received {
+    background-color: #f8d7da; /* Alınan mesaj rengi */
+    align-self: flex-start; /* Mesajın sola yaslanması */
+  }
