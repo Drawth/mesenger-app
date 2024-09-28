@@ -36,7 +36,7 @@ const Auth = () => {
     try {
       const user = await login(data.email, data.password);
       dispatch(setUser(user.email)); // Kullanıcı bilgilerini Redux'a kaydet
-      navigate("/home"); // Başarılı giriş sonrası yönlendirme
+      navigate("/chatpage"); // Başarılı giriş sonrası yönlendirme
     } catch (error) {
       const errorMessage = errorMessages[error.code] || error.message;
       setErrorMessage(errorMessage);

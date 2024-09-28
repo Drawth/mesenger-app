@@ -67,6 +67,13 @@ const logout = async () => {
   }
 };
 
-export { login, register, logout }; // Fonksiyonları dışa aktar
-
 export const db = getFirestore(app);
+// Kullanıcıları Firestore'dan alma fonksiyonu
+export const getUsersFromFirestore = async () => {
+  const usersCollection = collection(db, "users"); // "users" koleksiyonunu hedefleme
+  const userSnapshot = await getDocs(usersCollection);
+  const userList = userSnapshot.docs.map((doc) => doc.data().email); // Kullanıcıların e-posta adreslerini alma
+  return userList;
+};
+
+export { login, register, logout }; // Fonksiyonları dışa aktar

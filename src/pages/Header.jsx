@@ -1,15 +1,17 @@
 import React from "react";
 import { AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logoutUser } from "../store/authSlice"; // Logout işlemi için slice'dan action çağırıyoruz
 
 const Header = () => {
   const user = useSelector((state) => state.auth.user); // Kullanıcı durumu
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     dispatch(logoutUser());
+    navigate("/");
   };
 
   return (
