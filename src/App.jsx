@@ -5,7 +5,6 @@ import { Provider, useDispatch } from "react-redux";
 import { store } from "./store/store"; // Redux store
 import { useEffect } from "react";
 import { fetchUsers } from "./store/authSlice"; // Kullanıcıları çekmek için ekledik
-
 const App = () => {
   const dispatch = useDispatch();
 

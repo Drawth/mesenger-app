@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, collection, getDocs, addDoc } from "firebase/firestore";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -71,9 +71,25 @@ export const db = getFirestore(app);
 // Kullanıcıları Firestore'dan alma fonksiyonu
 export const getUsersFromFirestore = async () => {
   const usersCollection = collection(db, "users"); // "users" koleksiyonunu hedefleme
-  const userSnapshot = await getDocs(usersCollection);
-  const userList = userSnapshot.docs.map((doc) => doc.data().email); // Kullanıcıların e-posta adreslerini alma
-  return userList;
+  try {
+    const userSnapshot = await getDocs(usersCollection);
+    const userList = userSnapshot.docs.map((doc) => doc.data().email);
+    console.log("Firestore'dan çekilen kullanıcılar:", userList);
+    return userList;
+  } catch (error) {
+    console.error("Kullanıcıları çekerken hata oluştu:", error);
+    throw error;
+  }
 };
-
+export const addUserToFirestore = async (user) => {
+  try {
+    const userRef = collection(db, "users"); // "users" koleksiyonunu al
+    await addDoc(userRef, {
+      email: user.email,
+      // İstersen buraya başka bilgiler de ekleyebilirsin (örneğin, ad, soyad)
+    });
+  } catch (error) {
+    console.error("Kullanıcı Firestore'a eklenirken hata:", error);
+  }
+};
 export { login, register, logout }; // Fonksiyonları dışa aktar
