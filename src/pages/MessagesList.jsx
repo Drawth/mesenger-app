@@ -1,109 +1,65 @@
-import React, { useState } from "react";
-import { List, ListItem, Typography, Box } from "@mui/material";
-import { useSelector } from "react-redux";
-import { formatDistanceToNow } from "date-fns";
-import MessagesForm from "./MessagesForm"; // Mesaj formu bileşeni
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchMessages } from "../store/messageSlice"; // Mesajları çekmek için slice
+import {
+  Box,
+  Typography,
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
+} from "@mui/material";
 
-const MessageList = () => {
-  const messages = useSelector((state) => state.messages?.items || []);
-  const currentUserEmail = useSelector((state) => state.auth.user?.email);
+const MessagesList = ({ userEmail }) => {
+  const dispatch = useDispatch();
+  const messages = useSelector((state) => state.messages.items); // Mesajları Redux store'dan al
 
-  // Örnek mesajlar
-  const exampleMessages = [
-    {
-      email: "ahmet@example.com",
-      message: "Merhaba, nasılsın?",
-      timestamp: Date.now() - 60000,
-    },
-    {
-      email: "ayse@example.com",
-      message: "Bugün hava çok güzel!",
-      timestamp: Date.now() - 120000,
-    },
-    {
-      email: "mehmet@example.com",
-      message: "Bu akşam ne yapıyorsun?",
-      timestamp: Date.now() - 300000,
-    },
-  ];
+  useEffect(() => {
+    const getMessages = async () => {
+      await dispatch(fetchMessages());
+    };
 
-  const allMessages = messages.length > 0 ? messages : exampleMessages;
+    getMessages();
+
+    // Mesajların güncellenmesi için interval ayarlama
+    const interval = setInterval(() => {
+      getMessages();
+    }, 5000); // 5 saniyede bir mesajları güncelle
+
+    return () => clearInterval(interval); // Component unmount edildiğinde interval'i temizle
+  }, [dispatch]);
+
+  // Kullanıcının mesajlarını filtrele
+  const userMessages = messages.filter(
+    (message) => message.email === userEmail
+  );
 
   return (
-    <List
-      sx={{
-        maxWidth: 600,
-        margin: "auto",
-        marginTop: 3,
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      {allMessages.length === 0 ? (
-        <Typography variant="subtitle1" align="center">
-          Henüz mesaj yok.
-        </Typography>
-      ) : (
-        allMessages.map((msg, index) => {
-          const isOwnMessage = msg.email === currentUserEmail;
-
-          return (
-            <ListItem
-              key={index}
-              sx={{
-                width: "100%", // Genişliği artırdık
-                justifyContent: "center", // İçeriği ortaladık
-                marginBottom: "10px",
-              }}
-            >
-              <Box
-                sx={{
-                  backgroundColor: isOwnMessage ? "#dcf8c6" : "#f1f1f1",
-                  borderRadius: "15px",
-                  padding: "10px 15px",
-                  maxWidth: "80%",
-                  boxShadow: 1,
-                  position: "relative",
-                }}
-              >
-                <Typography
-                  variant="body2"
-                  sx={{ fontWeight: isOwnMessage ? "bold" : "normal" }}
-                >
-                  {isOwnMessage ? "Siz" : msg.email}
-                </Typography>
-                <Typography variant="body1">{msg.message}</Typography>
-                <Typography variant="caption" color="textSecondary">
-                  {formatDistanceToNow(new Date(msg.timestamp), {
-                    addSuffix: true,
-                  })}
-                </Typography>
-
-                {/* Mesaj gönderim formu */}
-                {!isOwnMessage && (
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "center",
-                      marginTop: 2,
-                    }}
-                  >
-                    <MessagesForm recipient={msg.email} />
-                  </Box>
-                )}
-              </Box>
-            </ListItem>
-          );
-        })
-      )}
-    </List>
+    <Box sx={{ padding: 2 }}>
+      <Typography variant="h5" gutterBottom>
+        Gelen Mesajlar
+      </Typography>
+      <List>
+        {userMessages.length > 0 ? (
+          userMessages.map((message) => (
+            <div key={message.id}>
+              <ListItem>
+                <ListItemText
+                  primary={`${message.email}: ${message.message}`}
+                  secondary={new Date(message.timestamp).toLocaleString()} // Timestamp'i okunabilir formata çevir
+                />
+              </ListItem>
+              <Divider />
+            </div>
+          ))
+        ) : (
+          <Typography variant="body2" color="textSecondary">
+            Hiç mesaj yok.
+          </Typography>
+        )}
+      </List>
+    </Box>
   );
 };
 
-export default MessageList;
-//display: "flex",
-//flexDirection: "row",
-//alignItems: "center",
-//justifyContent: "center",
+export default MessagesList;

@@ -1,31 +1,92 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { auth, db } from "../Firebase"; // Firebase yapılandırmanızı import edin
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
-import { auth, getUsersFromFirestore, addUserToFirestore } from "../Firebase";
-import { doc, setDoc } from "firebase/firestore";
-import { createSelector } from "reselect"; // reselect'i ekleyin
+import {
+  collection,
+  addDoc,
+  doc,
+  setDoc,
+  getDoc,
+  getDocs,
+} from "firebase/firestore";
 
-// Kullanıcıları Firestore'dan alma thunk'ı
-export const fetchUsers = createAsyncThunk("auth/fetchUsers", async () => {
+// Kullanıcıyı hem Auth'a hem Firestore'a ekleme işlemi
+export const registerUser = (email, password) => async (dispatch) => {
   try {
-    const users = await getUsersFromFirestore();
-    console.log("Redux state'e eklenen kullanıcılar:", users); // Konsola yazdır
-    return users;
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+    const user = userCredential.user;
+
+    // Kullanıcıyı Firestore'daki "users" koleksiyonuna kaydet
+    await setDoc(doc(db, "users", user.uid), {
+      uid: user.uid,
+      email: user.email,
+      createdAt: new Date().toISOString(),
+    });
+
+    dispatch(setUser(user)); // Redux state'e kullanıcıyı ekle
   } catch (error) {
-    console.error("Kullanıcıları çekerken hata:", error); // Hata mesajı
-    throw error; // Hata fırlat
+    dispatch(
+      setError("Kayıt işlemi başarısız. Lütfen bilgilerinizi kontrol edin.")
+    );
   }
+};
+
+// Giriş işlemi
+export const loginUser = (email, password) => async (dispatch) => {
+  try {
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+    const user = userCredential.user;
+
+    // Firestore'dan kullanıcı bilgilerini çek
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      dispatch(setUser(userData)); // Redux state'e Firestore'dan gelen kullanıcı bilgilerini ekle
+    } else {
+      dispatch(setUser(user)); // Firestore'da yoksa sadece Auth'tan gelen bilgiyi ekle
+    }
+  } catch (error) {
+    dispatch(setError("Giriş yapılamadı. Lütfen bilgilerinizi kontrol edin."));
+  }
+};
+
+// Kullanıcıyı Firestore'dan çekme
+export const fetchUsers = createAsyncThunk("auth/fetchUsers", async () => {
+  const usersCollection = collection(db, "users");
+  const snapshot = await getDocs(usersCollection);
+  const users = snapshot.docs.map((doc) => doc.data());
+  return users;
 });
+
+// Çıkış işlemi (Logout)
+export const logoutUser = () => async (dispatch) => {
+  try {
+    await signOut(auth); // Firebase'den çıkış işlemi
+    dispatch(clearUser()); // Redux state'deki kullanıcıyı temizle
+  } catch (error) {
+    dispatch(setError("Çıkış yapılamadı. Lütfen tekrar deneyin."));
+  }
+};
 
 const authSlice = createSlice({
   name: "auth",
   initialState: {
     user: null,
     error: null,
-    users: [], // Kullanıcıları saklamak için
+    users: [], // Kullanıcı listesini saklamak için
   },
   reducers: {
     setUser: (state, action) => {
@@ -50,64 +111,11 @@ const authSlice = createSlice({
       });
   },
 });
+// Selectors (eklenen kısım)
+export const selectUser = (state) => state.auth.user; // Mevcut oturum açmış kullanıcıyı seçer
+export const selectUsers = (state) => state.auth.users; // Tüm kullanıcıları seçer
+export const selectAuthError = (state) => state.auth.error; // Hata mesajlarını seçer
 
-// Seçici fonksiyonu
-export const selectUsers = (state) => state.auth.users;
-
-// Memoize edilmiş kullanıcı seçici
-export const makeSelectUsers = () =>
-  createSelector(selectUsers, (users) => users);
-
-// Aksiyonları dışa aktar
+// Actions ve reducer dışa aktarımı
 export const { setUser, setError, clearUser } = authSlice.actions;
-
-// Kullanıcı girişi
-export const loginUser = (email, password) => async (dispatch) => {
-  try {
-    const userCredential = await signInWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
-    dispatch(setUser(userCredential.user));
-    dispatch(fetchUsers()); // Giriş yapıldığında kullanıcıları çek
-  } catch (error) {
-    dispatch(setError("Giriş yapılamadı. Lütfen bilgilerinizi kontrol edin."));
-  }
-};
-
-// Kullanıcı kaydı
-export const registerUser = (email, password) => async (dispatch) => {
-  try {
-    const userCredential = await createUserWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
-    dispatch(setUser(userCredential.user));
-
-    // Kullanıcıyı Firestore'a ekle
-    await setDoc(doc(db, "users", userCredential.user.uid), {
-      email: userCredential.user.email,
-      // Buraya başka kullanıcı bilgileri ekleyebilirsin (örneğin ad, soyad vs.)
-    });
-
-    dispatch(fetchUsers()); // Kullanıcıları al
-  } catch (error) {
-    dispatch(
-      setError("Kayıt işlemi başarısız. Lütfen bilgilerinizi kontrol edin.")
-    );
-  }
-};
-
-// Kullanıcı çıkışı
-export const logoutUser = () => async (dispatch) => {
-  try {
-    await signOut(auth);
-    dispatch(clearUser());
-  } catch (error) {
-    dispatch(setError("Çıkış işlemi başarısız."));
-  }
-};
-
 export default authSlice.reducer;

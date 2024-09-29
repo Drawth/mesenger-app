@@ -1,31 +1,16 @@
-import "./App.css";
-import RouterConfig from "./config/RouterConfig";
+import React from "react";
+import { Provider } from "react-redux";
+import store from "./store/store"; // store'u içe aktar
 import Header from "./pages/Header";
-import { Provider, useDispatch } from "react-redux";
-import { store } from "./store/store"; // Redux store
-import { useEffect } from "react";
-import { fetchUsers } from "./store/authSlice"; // Kullanıcıları çekmek için ekledik
+import RouterConfig from "./config/RouterConfig";
+
 const App = () => {
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    // Uygulama yüklendiğinde kullanıcıları çek
-    dispatch(fetchUsers());
-  }, [dispatch]);
-
   return (
-    <div>
+    <Provider store={store}>
       <Header />
       <RouterConfig />
-    </div>
+    </Provider>
   );
 };
 
-// Provider ile sarmalama
-const AppWrapper = () => (
-  <Provider store={store}>
-    <App />
-  </Provider>
-);
-
-export default AppWrapper;
+export default App;

@@ -1,10 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit";
-import authReducer from "./authSlice";
-import messageReducer from "./messageSlice";
+import authReducer from "./authSlice"; // Auth slice'ınızı buraya ekleyin
+import messagesReducer from "./messageSlice"; // Mesajlar slice'ınızı buraya ekleyin
 
-export const store = configureStore({
+const store = configureStore({
   reducer: {
     auth: authReducer,
-    message: messageReducer,
+    messages: messagesReducer, // Mesajlar slice'ını buraya ekleyin
   },
 });
+
+export default store;
