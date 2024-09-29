@@ -1,8 +1,5 @@
-# React + Vite
+Merhaba size Mesenger App nasıl kullanılır, nasıl hesap oluşturulur onu anlatacağım.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+İlk olarak Kayıt ol /Register sayfasından isim, mail, şifre ile kayıt olmamız gerekiyor. Burada mail adresi giriyoruz çünkü mail adresleri zaten tektir. Bu bizim id'miz gibi düşünebiliriz. Kayıt olduktan sonra direkt login olacağız.
+Burada gelen mesajlar listelenecek ve aşağı inince yeni mesaj oluşturma butonuna tıklanınca bir form açılacak bu formu doldurup
+Gönder butonuna tıklanınca o kullanıcıya mesaj olarak gidecektir.
